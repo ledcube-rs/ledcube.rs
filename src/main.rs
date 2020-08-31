@@ -3,24 +3,25 @@
 
 use panic_halt as _;
 
-use embedded_graphics::image::{Image, ImageRaw};
-use embedded_graphics::pixelcolor::raw::LittleEndian;
-use embedded_graphics::pixelcolor::Rgb565;
 use embedded_graphics::prelude::*;
-use embedded_graphics::primitive_style;
-use embedded_graphics::primitives::Rectangle;
+use embedded_hal::blocking::delay::DelayMs;
+use gd32vf103xx_hal::delay::McycleDelay;
 use gd32vf103xx_hal::pac;
 use gd32vf103xx_hal::prelude::*;
 use longan_nano::{lcd, lcd_pins};
 use riscv_rt::entry;
 
-const FERRIS: &[u8] = include_bytes!("ferris.raw");
+mod shiftreg;
+use shiftreg::Driver;
+
+mod display;
+use display::Display;
 
 #[entry]
 fn main() -> ! {
     let dp = pac::Peripherals::take().unwrap();
 
-    // Configure clocks
+    // Configure clocks and GPIO
     let mut rcu = dp
         .RCU
         .configure()
@@ -28,25 +29,38 @@ fn main() -> ! {
         .sysclk(108.mhz())
         .freeze();
     let mut afio = dp.AFIO.constrain(&mut rcu);
-
     let gpioa = dp.GPIOA.split(&mut rcu);
     let gpiob = dp.GPIOB.split(&mut rcu);
 
+    // LCD Display: How does not like ferris
     let lcd_pins = lcd_pins!(gpioa, gpiob);
-    let mut lcd = lcd::configure(dp.SPI0, lcd_pins, &mut afio, &mut rcu);
+    let lcd = lcd::configure(dp.SPI0, lcd_pins, &mut afio, &mut rcu);
     let (width, height) = (lcd.size().width as i32, lcd.size().height as i32);
+    let mut display = Display::new(lcd, width, height);
+    display.draw_ferris();
 
-    // Clear screen
-    Rectangle::new(Point::new(0, 0), Point::new(width - 1, height - 1))
-        .into_styled(primitive_style!(fill_color = Rgb565::BLACK))
-        .draw(&mut lcd)
-        .unwrap();
+    // LED: How does not like a green LED
+    gpioa
+        .pa1
+        .into_push_pull_output_with_state(gd32vf103xx_hal::gpio::State::Low);
 
-    // Load Image Data
-    let raw_image: ImageRaw<Rgb565, LittleEndian> = ImageRaw::new(&FERRIS, 86, 64);
-    Image::new(&raw_image, Point::new(width / 2 - 43, height / 2 - 32))
-        .draw(&mut lcd)
-        .unwrap();
+    let mut delay = McycleDelay::new(&rcu.clocks);
 
-    loop {}
+    // Setup Shiftregister
+    let mut shiftreg = match Driver::new(reg_pins!(gpioa), 8) {
+        Ok(v) => v,
+        Err(e) => panic!(e),
+    };
+
+    delay.delay_ms(2000);
+    shiftreg.set(1, true).unwrap();
+    shiftreg.set(3, true).unwrap();
+    shiftreg.set(5, true).unwrap();
+    shiftreg.set(7, true).unwrap();
+    shiftreg.update().unwrap();
+    shiftreg.update().unwrap();
+
+    loop {
+        delay.delay_ms(20)
+    }
 }
