@@ -57,7 +57,7 @@ impl Driver {
     }
 
     pub fn set(&mut self, index: usize, bit: bool) -> Result<(), &'static str> {
-        if index >= MAX_BITS {
+        if index >= self.bits {
             return Err("index out of range");
         }
         self.registers[index] = bit;
@@ -65,16 +65,16 @@ impl Driver {
     }
 
     pub fn update(&mut self) -> Result<(), &'static str> {
-        self.pins.latch.set_low().unwrap();
         for bit in 0..self.bits {
+            self.pins.latch.set_low().unwrap();
             match self.registers[bit] {
                 true => self.pins.data.set_high().unwrap(),
                 false => self.pins.data.set_low().unwrap(),
             }
             self.pins.clock.set_high().unwrap();
             self.pins.clock.set_low().unwrap();
+            self.pins.latch.set_high().unwrap();
         }
-        self.pins.latch.set_high().unwrap();
         Ok(())
     }
 }

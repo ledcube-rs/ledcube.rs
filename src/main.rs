@@ -4,7 +4,6 @@
 use panic_halt as _;
 
 use embedded_graphics::prelude::*;
-use embedded_hal::blocking::delay::DelayMs;
 use gd32vf103xx_hal::delay::McycleDelay;
 use gd32vf103xx_hal::pac;
 use gd32vf103xx_hal::prelude::*;
@@ -16,6 +15,9 @@ use shiftreg::Driver;
 
 mod display;
 use display::Display;
+
+mod cubes;
+use cubes::snake::Cube;
 
 #[entry]
 fn main() -> ! {
@@ -39,28 +41,37 @@ fn main() -> ! {
     let mut display = Display::new(lcd, width, height);
     display.draw_ferris();
 
-    // LED: How does not like a green LED
+    // LED: Who does not like a green LED
     gpioa
         .pa1
         .into_push_pull_output_with_state(gd32vf103xx_hal::gpio::State::Low);
 
     let mut delay = McycleDelay::new(&rcu.clocks);
 
-    // Setup Shiftregister
-    let mut shiftreg = match Driver::new(reg_pins!(gpioa), 8) {
+    let mut shiftreg = match Driver::new(reg_pins!(gpioa), 30) {
         Ok(v) => v,
         Err(e) => panic!(e),
     };
 
-    delay.delay_ms(2000);
-    shiftreg.set(1, true).unwrap();
-    shiftreg.set(3, true).unwrap();
-    shiftreg.set(5, true).unwrap();
-    shiftreg.set(7, true).unwrap();
-    shiftreg.update().unwrap();
-    shiftreg.update().unwrap();
+    let mut cube = Cube {
+        tick_ms: 100,
+        edge_length: 5,
+    };
 
     loop {
-        delay.delay_ms(20)
+        cube.effect_shift_planes_fill_up(&mut shiftreg, &mut delay, 1);
+        cube.effect_shift_planes_fill_down(&mut shiftreg, &mut delay, 1);
+        cube.effect_shift_planes_fill_up(&mut shiftreg, &mut delay, 1);
+        cube.effect_shift_planes_fill_down(&mut shiftreg, &mut delay, 1);
+        cube.effect_shift_planes_fill_up(&mut shiftreg, &mut delay, 1);
+        cube.effect_shift_planes_fill_down(&mut shiftreg, &mut delay, 1);
+        cube.effect_scissors(&mut shiftreg, &mut delay, 6);
+        cube.tick_ms = 50;
+        cube.effect_shift_walls2(&mut shiftreg, &mut delay, 10);
+        cube.effect_shift_planes2(&mut shiftreg, &mut delay, 10);
+        cube.effect_snake_walk(&mut shiftreg, &mut delay, 1);
+        cube.effect_scissors(&mut shiftreg, &mut delay, 10);
+        cube.effect_shift_planes2(&mut shiftreg, &mut delay, 10);
+        cube.tick_ms = 100;
     }
 }

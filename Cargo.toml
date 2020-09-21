@@ -16,3 +16,5 @@ riscv-rt = "0.6.1"
 panic-halt = "0.2.0"
 embedded-graphics = "0.6"
 smallvec = "1.4.2"
+rand = { version = "0.7", default-features = false }
+rand_pcg = "0.2.1"
