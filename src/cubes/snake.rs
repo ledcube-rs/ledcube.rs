@@ -277,4 +277,29 @@ impl Cube {
             }
         }
     }
+
+    pub fn effect_scissors_fill(
+        &self,
+        driver: &mut Driver,
+        delay: &mut McycleDelay,
+        n_loops: usize,
+    ) {
+        for _ in 0..n_loops {
+            self.effect_light_none(driver, delay);
+            for i in 0..self.edge_length {
+                for n in 0..self.edge_length {
+                    driver.set(i + n * 5, true).unwrap();
+                }
+                driver.update().unwrap();
+                delay.delay_ms(self.tick_ms);
+            }
+            for i in 0..self.edge_length {
+                for n in 0..self.edge_length {
+                    driver.set(i + n * 5, false).unwrap();
+                }
+                driver.update().unwrap();
+                delay.delay_ms(self.tick_ms);
+            }
+        }
+    }
 }

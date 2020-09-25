@@ -67,6 +67,7 @@ fn main() -> ! {
         cube.effect_shift_planes_fill_down(&mut shiftreg, &mut delay, 1);
         cube.effect_scissors(&mut shiftreg, &mut delay, 6);
         cube.tick_ms = 50;
+        cube.effect_scissors_fill(&mut shiftreg, &mut delay, 6);
         cube.effect_shift_walls2(&mut shiftreg, &mut delay, 10);
         cube.effect_shift_planes2(&mut shiftreg, &mut delay, 10);
         cube.effect_snake_walk(&mut shiftreg, &mut delay, 1);
