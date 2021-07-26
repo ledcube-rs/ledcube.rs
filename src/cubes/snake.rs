@@ -302,4 +302,51 @@ impl Cube {
             }
         }
     }
+
+    pub fn effect_blink(&self, driver: &mut Driver, delay: &mut McycleDelay, n_loops: usize) {
+        for _ in 0..n_loops {
+            self.effect_light_all(driver, delay);
+            delay.delay_ms(self.tick_ms * 4);
+            self.effect_light_none(driver, delay);
+            delay.delay_ms(self.tick_ms * 2);
+        }
+    }
+
+    pub fn effect_roll_planes(&self, driver: &mut Driver, delay: &mut McycleDelay, n_loops: usize) {
+        for _ in 0..n_loops {
+            self.effect_light_all(driver, delay);
+            for n in self.edge_length * self.edge_length + 1
+                ..self.edge_length * self.edge_length + self.edge_length
+            {
+                driver.set(n, false).unwrap();
+            }
+            driver.update();
+            delay.delay_ms(self.tick_ms);
+
+            self.effect_light_none(driver, delay);
+            for n in 0..self.edge_length {
+                driver.set(n, true).unwrap();
+            }
+            driver.update();
+            delay.delay_ms(self.tick_ms);
+
+            self.effect_light_all(driver, delay);
+            for n in self.edge_length * self.edge_length
+                ..self.edge_length * self.edge_length + self.edge_length - 1
+            {
+                driver.set(n, false).unwrap();
+            }
+            driver.update();
+            delay.delay_ms(self.tick_ms);
+
+            self.effect_light_none(driver, delay);
+            for n in self.edge_length * self.edge_length - self.edge_length
+                ..self.edge_length * self.edge_length
+            {
+                driver.set(n, true).unwrap();
+            }
+            driver.update();
+            delay.delay_ms(self.tick_ms);
+        }
+    }
 }

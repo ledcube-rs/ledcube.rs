@@ -50,7 +50,7 @@ fn main() -> ! {
 
     let mut shiftreg = match Driver::new(reg_pins!(gpioa), 30) {
         Ok(v) => v,
-        Err(e) => panic!(e),
+        Err(e) => panic!("no driver: {}", e),
     };
 
     let mut cube = Cube {
@@ -59,20 +59,22 @@ fn main() -> ! {
     };
 
     loop {
+        if cube.tick_ms <= 100 {
+            cube.tick_ms = 250;
+        } else {
+            cube.tick_ms = 100;
+        }
+        cube.effect_blink(&mut shiftreg, &mut delay, 2);
         cube.effect_shift_planes_fill_up(&mut shiftreg, &mut delay, 1);
         cube.effect_shift_planes_fill_down(&mut shiftreg, &mut delay, 1);
-        cube.effect_shift_planes_fill_up(&mut shiftreg, &mut delay, 1);
-        cube.effect_shift_planes_fill_down(&mut shiftreg, &mut delay, 1);
-        cube.effect_shift_planes_fill_up(&mut shiftreg, &mut delay, 1);
-        cube.effect_shift_planes_fill_down(&mut shiftreg, &mut delay, 1);
-        cube.effect_scissors(&mut shiftreg, &mut delay, 6);
-        cube.tick_ms = 50;
+        cube.effect_roll_planes(&mut shiftreg, &mut delay, 5);
+        cube.tick_ms /= 2;
         cube.effect_scissors_fill(&mut shiftreg, &mut delay, 6);
-        cube.effect_shift_walls2(&mut shiftreg, &mut delay, 10);
-        cube.effect_shift_planes2(&mut shiftreg, &mut delay, 10);
+        cube.effect_shift_planes_fill_up(&mut shiftreg, &mut delay, 2);
+        cube.effect_shift_walls(&mut shiftreg, &mut delay, 8);
+        cube.effect_shift_planes2(&mut shiftreg, &mut delay, 8);
         cube.effect_snake_walk(&mut shiftreg, &mut delay, 1);
         cube.effect_scissors(&mut shiftreg, &mut delay, 10);
-        cube.effect_shift_planes2(&mut shiftreg, &mut delay, 10);
-        cube.tick_ms = 100;
+        cube.effect_roll_planes(&mut shiftreg, &mut delay, 10);
     }
 }
