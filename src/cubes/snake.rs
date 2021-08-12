@@ -303,6 +303,14 @@ impl Cube {
         }
     }
 
+    pub fn effect_collide(&self, driver: &mut Driver, delay: &mut McycleDelay, n_loops: usize) {
+        todo!()
+    }
+
+    pub fn effect_x(&self, driver: &mut Driver, delay: &mut McycleDelay, n_loops: usize) {
+        todo!()
+    }
+
     pub fn effect_blink(&self, driver: &mut Driver, delay: &mut McycleDelay, n_loops: usize) {
         for _ in 0..n_loops {
             self.effect_light_all(driver, delay);

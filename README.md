@@ -18,4 +18,7 @@ And a picture of the second one:
 
 ![](cube2.jpg)
 
-I plan on building more cubes using a more convenient wiring schema though. Maybe I'll also upload the schema and parts list in the future.
+# Schema
+
+Electrical and PCB schemas can be foud in [this repository](https://github.com/xermicus/pcb/tree/main/ledcube_5).
+
