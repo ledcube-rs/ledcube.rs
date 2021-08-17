@@ -5,8 +5,8 @@ use gd32vf103xx_hal::gpio::{Output, PushPull};
 /// Sets up the needed GPIO pins for the Shiftregister
 /// Wiring:
 /// PA12: Data
-/// PA4: Clock
-/// PA0: Latch
+/// PA4: Latch
+/// PA0: Clock
 ///
 /// Setup:
 /// ```
@@ -21,10 +21,10 @@ macro_rules! reg_pins {
                 .pa12
                 .into_push_pull_output_with_state(gd32vf103xx_hal::gpio::State::Low),
             clock: $gpioa
-                .pa4
+                .pa0
                 .into_push_pull_output_with_state(gd32vf103xx_hal::gpio::State::Low),
             latch: $gpioa
-                .pa0
+                .pa4
                 .into_push_pull_output_with_state(gd32vf103xx_hal::gpio::State::Low),
         }
     }};
@@ -40,8 +40,8 @@ pub struct Driver {
 
 pub struct Pins {
     pub data: PA12<Output<PushPull>>,
-    pub clock: PA4<Output<PushPull>>,
-    pub latch: PA0<Output<PushPull>>,
+    pub clock: PA0<Output<PushPull>>,
+    pub latch: PA4<Output<PushPull>>,
 }
 
 impl Driver {
@@ -66,15 +66,15 @@ impl Driver {
 
     pub fn update(&mut self) -> Result<(), &'static str> {
         for bit in 0..self.bits {
-            self.pins.latch.set_low().unwrap();
             match self.registers[bit] {
                 true => self.pins.data.set_high().unwrap(),
                 false => self.pins.data.set_low().unwrap(),
             }
             self.pins.clock.set_high().unwrap();
             self.pins.clock.set_low().unwrap();
-            self.pins.latch.set_high().unwrap();
         }
+        self.pins.latch.set_high().unwrap();
+        self.pins.latch.set_low().unwrap();
         Ok(())
     }
 }

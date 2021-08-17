@@ -116,6 +116,7 @@ impl Cube {
                 delay.delay_ms(self.tick_ms);
             }
         }
+        driver.update().unwrap();
     }
     pub fn effect_shift_planes_fill_down(
         &self,
@@ -141,6 +142,7 @@ impl Cube {
                 delay.delay_ms(self.tick_ms);
             }
         }
+        driver.update().unwrap();
     }
 
     pub fn effect_shift_planes(
