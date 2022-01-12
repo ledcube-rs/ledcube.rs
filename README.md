@@ -22,3 +22,5 @@ And a picture of the second one:
 
 Electrical and PCB schemas can be foud in [this repository](https://github.com/xermicus/pcb/tree/main/ledcube_5).
 
+# LICENSE
+This project is licensed under the [Mozilla Public License](LICENSE)
