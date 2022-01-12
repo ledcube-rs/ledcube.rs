@@ -2,8 +2,8 @@ use embedded_graphics::image::{Image, ImageRaw};
 use embedded_graphics::pixelcolor::raw::LittleEndian;
 use embedded_graphics::pixelcolor::Rgb565;
 use embedded_graphics::prelude::*;
-use embedded_graphics::primitive_style;
 use embedded_graphics::primitives::Rectangle;
+use embedded_graphics::primitives::{PrimitiveStyleBuilder};
 use longan_nano::lcd;
 
 const FERRIS: &[u8] = include_bytes!("ferris.raw");
@@ -25,16 +25,25 @@ impl Display {
 
     pub fn draw_ferris(&mut self) {
         // Clear screen
-        Rectangle::new(
+        /*Rectangle::new(
             Point::new(0, 0),
             Point::new(self.width - 1, self.height - 1),
         )
         .into_styled(primitive_style!(fill_color = Rgb565::BLACK))
         .draw(&mut self.driver)
+        .unwrap();*/
+        Rectangle::with_corners(Point::new(0, 0), Point::new(self.width - 1, self.height - 1))
+        .into_styled(
+            PrimitiveStyleBuilder::new()
+               .stroke_color(Rgb565::BLACK)
+               .fill_color(Rgb565::BLACK)
+               .build()
+        )
+        .draw(&mut self.driver)
         .unwrap();
 
         // Load Image Data
-        let raw_image: ImageRaw<Rgb565, LittleEndian> = ImageRaw::new(&FERRIS, 86, 64);
+        let raw_image: ImageRaw<Rgb565, LittleEndian> = ImageRaw::new(&FERRIS, 86);
         Image::new(
             &raw_image,
             Point::new(self.width / 2 - 43, self.height / 2 - 32),
